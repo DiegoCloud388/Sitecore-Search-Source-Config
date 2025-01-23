@@ -5,38 +5,28 @@ class RequestExtractor {
     }
 
     extract(request, response) {
-        const requests = [];
+        let requests = [];
         if (response && response.data && response.data.item && response.data.item.children) {
-            requests = response.body.data.item.children.results.map((e, i) => {
-                const path = `${request}/${child.name}`;
-                requests.push({
+            requests = response.data.item.children.results.map((e) => {
+                let nameItem = e.name;
+                let path = request + "/" + nameItem;
+                return {
                     url: this.apiUrl,
                     method: 'POST',
                     headers: {
-                        'content-type': 'application/json',
-                        'sc_apikey': this.apiKey,
+                        'content-type': ['application/json'],
+                        'sc_apikey' : this.apiKey
                     },
                     body: JSON.stringify({
-                        query: `query getItem($path: String) {
-                            item(language: "en", path: $path) {
-                                id
-                                path
-                                rendered
-                                children(first: 100) {
-                                    results {
-                                        name
-                                        rendered
-                                    }
-                                }
-                            }
-                        }`,
-                        operationName: 'getItem',
-                        variables: { path },
-                    }),
-                });
+                        "query": "query getItem($path: String) {item(language: \"en\", path: $path) {id path rendered children(first: 100) {results {name rendered}}}}",
+                        "operationName": "getItem",
+                        "variables": {
+                            "path": path
+                        }
+                    })
+                };        
             });
         }
-
         return requests;
     }
 }
