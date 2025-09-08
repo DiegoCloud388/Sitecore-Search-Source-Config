@@ -9,7 +9,7 @@ class Trigger {
     this.apiUrl = apiUrl;
   }
 
-  async fetchData(path) {
+  async requestTrigger(path) {
     try {
       const fetch = (await import('node-fetch')).default; // Používáme vestavěný fetch (od Node.js 18)
 
@@ -23,10 +23,8 @@ class Trigger {
                 query: `query getItem($path: String) {
                     item(language: "en", path: $path) {
                         id
-                        name
                         path
-                        rendered
-                        children(first: 100) {
+                        children {
                             results {
                                 name
                                 rendered
