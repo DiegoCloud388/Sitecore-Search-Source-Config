@@ -1,5 +1,6 @@
 class DocumentExtractor {
 
+    // Kontroluje, zda odpověď odpovídá kritériím pro extrakci
     match(request, response) {
         var data = response.body.data;
         return data?.item?.rendered != null &&
