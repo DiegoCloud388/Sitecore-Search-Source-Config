@@ -6,8 +6,8 @@ function delay(ms) {
 }
 
 class Crawler {
-    constructor(trigger, requestExtractor, documentExtractor) {
-        this.trigger = trigger;
+    constructor(triggers, requestExtractor, documentExtractor) {
+        this.triggers = Array.isArray(triggers) ? triggers : [triggers];
         this.requestExtractor = requestExtractor;
         this.documentExtractor = documentExtractor;
     }
@@ -28,57 +28,62 @@ class Crawler {
         logger.info(`🔍 Crawling path: ${path}`);
 
         // Root request
-        const rootResponse = await this.trigger.requestTrigger(path);
+        
         const documents = [];
 
-        // kořenový node
-        if (this.documentExtractor.match({ path }, { body: rootResponse })) {
-            const extracted = this.documentExtractor.extract({ path }, { body: rootResponse });
-            logger.info("Extracted root documents:", extracted);
-            documents.push(...extracted);
-        }
+        for (const trigger of this.triggers) {
+            await delay(1000);
+            const rootResponse = await trigger.requestTrigger(path);
+        
+            // kořenový node
+            if (this.documentExtractor.match({ path }, { body: rootResponse })) {
+                const extracted = this.documentExtractor.extract({ path }, { body: rootResponse });
+                logger.info("Extracted root documents:", extracted);
+                documents.push(...extracted);
+            }
 
-        // requesty na potomky
-        const requests = this.requestExtractor.extract(path, rootResponse);
+            // requesty na potomky
+            const requests = this.requestExtractor.extract(path, rootResponse);
 
-        const childDocs = await Promise.all(
-            requests.map(async (req) => {
-                await delay(500);
+            const childDocs = await Promise.all(
+                requests.map(async (req) => {
+                    await delay(1000);
 
-                const res = await fetch(req.url, {
-                    method: req.method,
-                    headers: req.headers,
-                    body: req.body,
-                });
+                    const res = await fetch(req.url, {
+                        method: req.method,
+                        headers: req.headers,
+                        body: req.body,
+                    });
 
-                const json = await res.json();
+                    const json = await res.json();
 
-                const docs = [];
+                    const docs = [];
 
-                if(this.documentExtractor.match(req, { body: json })) {
-                    const extracted = this.documentExtractor.extract(req, { body: json });
-                    logger.info("Extracted child documents:", extracted);
-                    docs.push(...extracted);
-                }
+                    if(this.documentExtractor.match(req, { body: json })) {
+                        const extracted = this.documentExtractor.extract(req, { body: json });
+                        logger.info("Extracted child documents:", extracted);
+                        docs.push(...extracted);
+                    }
 
-                let childPath;
-                try {
-                    const bodyObj = JSON.parse(req.body || "{}");
-                    childPath = bodyObj.variables?.path;
-                } catch {
-                    childPath = null;
-                }
+                    let childPath;
+                    try {
+                        const bodyObj = JSON.parse(req.body || "{}");
+                        childPath = bodyObj.variables?.path;
+                    } catch {
+                        childPath = null;
+                    }
 
-                if (childPath) {
-                    const nestedDocs = await this.crawlPath(childPath, visited);
-                    docs.push(...nestedDocs);
-                }
+                    if (childPath) {
+                        const nestedDocs = await this.crawlPath(childPath, visited);
+                        docs.push(...nestedDocs);
+                    }
 
-                return docs; // vrací jenom dokumenty z této větve
-            })
-        );
+                    return docs; // vrací jenom dokumenty z této větve
+                })
+            );
 
-        documents.push(...childDocs.flat());            
+            documents.push(...childDocs.flat());  
+        }                  
 
         return documents;
     }    

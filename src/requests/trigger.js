@@ -4,9 +4,10 @@
  */
 
 class Trigger {
-    constructor(apiKey, apiUrl) {
+    constructor(apiKey, apiUrl, language) {
         this.apiKey = apiKey;
         this.apiUrl = apiUrl;
+        this.language = language;
     }
 
     async requestTrigger(path) {
@@ -21,7 +22,7 @@ class Trigger {
                 },
                 body: JSON.stringify({
                     query: `query getItem($path: String) {
-                        item(language: "en", path: $path) {
+                        item(language: "${this.language}", path: $path) {
                             id
                             path
                             children {
