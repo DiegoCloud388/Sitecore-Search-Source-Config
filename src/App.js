@@ -22,13 +22,6 @@ class App {
       logger.info('Fetching initial data...');
       const initialPath = '/sitecore/content/Zentiva/zentiva/Home';
 
-      // const initialData = await this.trigger.requestTrigger(initialPath);
-      // console.log('Trigger requests:', initialData);
-
-      // console.log('Extracting requests...');
-      // const extractedRequests = this.requestExtractor.extract(initialPath, initialData);
-      // console.log('Extracted requests:', extractedRequests);
-
       const docs = await this.crawler.crawlPath(initialPath);
       logger.info(`📊 Celkový počet extrahovaných dokumentů: ${docs.length}`);
 
