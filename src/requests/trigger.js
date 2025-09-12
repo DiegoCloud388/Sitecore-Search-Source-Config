@@ -2,7 +2,6 @@
 /**
  * Třída Trigger načítá data z API.
  */
-
 class Trigger {
     constructor(apiKey, apiUrl, language) {
         this.apiKey = apiKey;

@@ -1,3 +1,7 @@
+// --- DocumentExtractor Class ---
+/**
+ * Třída DocumentExtractor filtruje načtené requesty pomocí metody match a mapuje výsledky do index dokumentu.
+ */
 class DocumentExtractor {
 
     // Kontroluje, zda odpověď odpovídá kritériím pro extrakci

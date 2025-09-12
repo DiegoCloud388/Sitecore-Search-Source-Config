@@ -1,3 +1,7 @@
+// --- RequestExtractor Class ---
+/**
+ * Třída RequestExtractor načítá potomky z root adresy.
+ */
 class RequestExtractor {
     constructor(apiKey, apiUrl) {
         this.apiKey = apiKey;
