@@ -28,10 +28,11 @@ async function withRetry(fn, retries = 3, delayMs = 1000) {
 }
 
 class Crawler {
-    constructor(triggers, requestExtractor, documentExtractor) {
+    constructor(triggers, requestExtractor, documentExtractor, locationExtractor) {
         this.triggers = Array.isArray(triggers) ? triggers : [triggers];
         this.requestExtractor = requestExtractor;
         this.documentExtractor = documentExtractor;
+        this.locationExtractor = locationExtractor;
     }
 
     /**
@@ -85,7 +86,8 @@ class Crawler {
 
                 if(this.documentExtractor.match(req, { body: json })) {
                     const extracted = this.documentExtractor.extract(req, { body: json });
-                    logger.info("Extracted child documents:", extracted);
+                    logger.info("📄 Extracted child documents:");
+                    logger.info(JSON.stringify(extracted, null, 2));
                     docs.push(...extracted);
                 }
 
