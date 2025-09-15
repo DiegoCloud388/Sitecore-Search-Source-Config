@@ -49,16 +49,13 @@ class Crawler {
 
         visited.add(path);
         logger.info(`🔍 Crawling path: ${path}`);
-
-        // Root request
         
         const documents = [];
 
         for (const trigger of this.triggers) {
-            //await delay(1000);
 
             // Získání root response
-            const rootResponse = await trigger.requestTrigger(path);
+            const { request: rootRequest, response: rootResponse} = await trigger.requestTrigger(path);
         
             // kořenový node
             if (this.documentExtractor.match({ path }, { body: rootResponse })) {
@@ -68,11 +65,9 @@ class Crawler {
             }
 
             // requesty na potomky
-            const requests = this.requestExtractor.extract(path, rootResponse);
+            const requests = this.requestExtractor.extract(rootRequest, { body: rootResponse });
 
             for (const req of requests) {
-                //await delay(1000);
-
                 const res = await withRetry(() =>
                     fetch(req.url, {
                         method: req.method,

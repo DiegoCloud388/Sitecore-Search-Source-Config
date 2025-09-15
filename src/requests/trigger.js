@@ -13,7 +13,8 @@ class Trigger {
         try {
             const fetch = (await import('node-fetch')).default; // Používáme vestavěný fetch (od Node.js 18)
 
-            const response = await fetch(this.apiUrl, {
+            const rootRequest = {
+                url: this.apiUrl,
                 method: 'POST',
                 headers: {
                     'sc_apikey': this.apiKey,
@@ -32,15 +33,26 @@ class Trigger {
                             }
                         }
                     }`,
-                variables: { path },
-            }),
-        });
+                variables: { 
+                    path,
+                    language: this.language
+                }
+            })
+        };
+
+        const response = await fetch(rootRequest.url, {
+            method: rootRequest.method,
+            headers: rootRequest.headers,
+            body: rootRequest.body
+        });        
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return await response.json();
+        const responseJson = await response.json();
+
+        return { request: rootRequest, response: responseJson };
         
         } catch (error) {
             console.error('Error fetching data:', error.message);

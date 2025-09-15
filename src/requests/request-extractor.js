@@ -10,27 +10,28 @@ class RequestExtractor {
 
     extract(request, response) {
         let requests = [];
-        if (response && response.data && response.data.item && response.data.item.children) {
-            requests = response.data.item.children.results.map((e) => {
+        if (response.body && response.body.data && response.body.data.item && response.body.data.item.children) {
+            requests = response.body.data.item.children.results.map((e, i) => {
                 let nameItem = e.name;
-                let path = request + "/" + nameItem;
+                let path = JSON.parse(request.body).variables.path + "/" + nameItem;
+                let language = JSON.parse(request.body).variables.language;
+                
                 return {
-                    url: this.apiUrl,
+                    url: request.url,
                     method: 'POST',
-                    headers: {
-                        'content-type': ['application/json'],
-                        'sc_apikey' : this.apiKey
-                    },
+                    headers: request.headers,
                     body: JSON.stringify({
-                        "query": "query getItem($path: String) {item(language: \"en\", path: $path) {id path rendered children {results {name rendered}}}}",
+                        "query": "query getItem($language: String!, $path: String) {item(language: $language, path: $path) {id path rendered children {results {name rendered}}}}",
                         "operationName": "getItem",
                         "variables": {
-                            "path": path
+                            "path": path,
+                            "language": language
                         }
                     })
                 };        
             });
         }
+
         return requests;
     }    
 }
