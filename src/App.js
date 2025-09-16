@@ -14,8 +14,8 @@ class App {
     this.triggerCs = new Trigger(apiKey, apiUrl, 'cs');
     //this.triggerEnDK = new Trigger(apiKey, apiUrl, 'en-DK');
     // this.triggerEt = new Trigger(apiKey, apiUrl, 'et');
-    // this.triggerLv = new Trigger(apiKey, apiUrl, 'lv');
-    // this.triggerLt = new Trigger(apiKey, apiUrl, 'lt');
+    //this.triggerLv = new Trigger(apiKey, apiUrl, 'lv');
+    this.triggerLt = new Trigger(apiKey, apiUrl, 'lt');
     // this.triggerBg = new Trigger(apiKey, apiUrl, 'bg');
     // this.triggerUk = new Trigger(apiKey, apiUrl, 'uk');
     // this.triggerRo = new Trigger(apiKey, apiUrl, 'ro');
@@ -30,7 +30,7 @@ class App {
       //this.triggerEnDK,
       // this.triggerEt,
       // this.triggerLv,
-      // this.triggerLt,
+      this.triggerLt,
       // this.triggerBg,
       // this.triggerUk,
       // this.triggerRo,
