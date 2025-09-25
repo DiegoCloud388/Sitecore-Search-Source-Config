@@ -12,30 +12,30 @@ class App {
     this.apiUrl = apiUrl;
     this.triggerEn = new Trigger(apiKey, apiUrl, 'en');
     this.triggerCs = new Trigger(apiKey, apiUrl, 'cs');
-    //this.triggerEnDK = new Trigger(apiKey, apiUrl, 'en-DK');
-    // this.triggerEt = new Trigger(apiKey, apiUrl, 'et');
-    //this.triggerLv = new Trigger(apiKey, apiUrl, 'lv');
+    this.triggerEnDK = new Trigger(apiKey, apiUrl, 'en-DK');
+    this.triggerEt = new Trigger(apiKey, apiUrl, 'et');
+    this.triggerLv = new Trigger(apiKey, apiUrl, 'lv');
     this.triggerLt = new Trigger(apiKey, apiUrl, 'lt');
-    // this.triggerBg = new Trigger(apiKey, apiUrl, 'bg');
-    // this.triggerUk = new Trigger(apiKey, apiUrl, 'uk');
-    // this.triggerRo = new Trigger(apiKey, apiUrl, 'ro');
+    this.triggerBg = new Trigger(apiKey, apiUrl, 'bg');
+    this.triggerUk = new Trigger(apiKey, apiUrl, 'uk');
+    this.triggerRo = new Trigger(apiKey, apiUrl, 'ro');
     this.triggerEnIn = new Trigger(apiKey, apiUrl, 'en-in');
-    //this.triggerNl = new Trigger(apiKey, apiUrl, 'nl');    
+    this.triggerNl = new Trigger(apiKey, apiUrl, 'nl');    
     this.requestExtractor = new RequestExtractor(apiKey, apiUrl);
     this.documentExtractor = new DocumentExtractor();
     this.locationExtractor = new LocationExtractor();
     this.crawler = new Crawler([
       this.triggerEn, 
       this.triggerCs, 
-      //this.triggerEnDK,
-      // this.triggerEt,
-      // this.triggerLv,
+      this.triggerEnDK,
+      this.triggerEt,
+      this.triggerLv,
       this.triggerLt,
-      // this.triggerBg,
-      // this.triggerUk,
-      // this.triggerRo,
+      this.triggerBg,
+      this.triggerUk,
+      this.triggerRo,
       this.triggerEnIn,
-      //this.triggerNl      
+      this.triggerNl      
     ], this.requestExtractor, this.documentExtractor, this.locationExtractor);
   }
 
@@ -45,7 +45,7 @@ class App {
   async run() {
     try {
       logger.info('Fetching initial data...');
-      const initialPath = '/sitecore/content/Zentiva/zentiva/Home';
+      const initialPath = '/sitecore/content/Zentiva/zentiva/Home/products/catalog';
 
       const docs = await this.crawler.crawlPath(initialPath);
       logger.info(`📊 Celkový počet zaindexovaných položek: ${docs.length}`);

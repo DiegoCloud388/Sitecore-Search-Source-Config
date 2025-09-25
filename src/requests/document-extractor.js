@@ -19,6 +19,8 @@ class DocumentExtractor {
         const headlessMain = data.item.rendered.sitecore?.route?.placeholders?.['headless-main'];
         const templateName = data.item.rendered.sitecore?.route.templateName ?? '';
         const rawTags = data.item.rendered.sitecore?.route?.fields?.tags;
+        const rawActiveIngredients = data.item.rendered.sitecore?.route?.fields?.activeIngredients;
+        const rawPackSize = data.item.rendered.sitecore?.route?.fields?.packSize;
         const language = data.item.rendered.sitecore?.context?.language;
         let annotation = data.item.rendered.sitecore?.route?.fields?.annotation?.value?.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
         let imageUrl = data.item.rendered.sitecore?.route?.fields?.image?.value?.src;
@@ -29,31 +31,45 @@ class DocumentExtractor {
 
         const participationTags = Array.isArray(data.item.rendered.sitecore?.route?.fields?.participationTags)
             ? data.item.rendered.sitecore.route.fields.participationTags
-            .map(tag => tag?.fields?.name?.value)
-            .filter(Boolean)
-            : [];
+                .map(tag => tag?.fields?.name?.value)
+                .filter(Boolean)
+            : [];        
 
         const tagNames = [...tags, ...participationTags];
-            
+
+        const activeIngredients = Array.isArray(rawActiveIngredients)
+            ? rawActiveIngredients.map(ing => ing?.fields?.title?.value).filter(Boolean)
+            : [];
+
+        const packSize = Array.isArray(rawPackSize)
+            ? rawPackSize.map(pack => pack?.fields?.title?.value).filter(Boolean)
+            : [];
+        
         // Category
         let category = null;
+        let categoryUrl = null;
 
         if (templateName === 'Event') {
             category = headlessMain
-            .find(x => x.componentName === 'EventDetail')
+                .find(x => x.componentName === 'EventDetail')
                 ?.fields?.data?.item?.ancestors?.[0]?.title?.value;
         } else if (templateName === 'News Article') {
             category = headlessMain
-            .flatMap(item => Object.values(item.placeholders || {}))
-            .flat()
-            .find(x => x.componentName === 'NewsArticleDetail')
+                .flatMap(item => Object.values(item.placeholders || {}))
+                .flat()
+                .find(x => x.componentName === 'NewsArticleDetail')
                 ?.fields?.data?.item?.ancestors?.[0]?.title?.value;
         } else if (templateName === 'Media File') {
-            category = headlessMain
-            .find(x => x.componentName === 'MediaFile')
-                ?.fields?.data?.item?.ancestors?.[0]?.title?.value;
+            const cat = headlessMain
+                .find(x => x.componentName === 'MediaFile')
+                ?.fields?.data?.item?.ancestors?.[0];
+            category = cat?.title?.value;
+            categoryUrl = cat?.url?.path;
             annotation = data.item.rendered.sitecore?.route?.fields?.description?.value?.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ');
             imageUrl = data.item.rendered.sitecore?.route?.fields?.mediaImage?.value?.src;
+        } else if (templateName === 'Product Page') {
+            category = 'Products';
+            imageUrl = data.item.rendered.sitecore?.route?.fields?.imageName?.value?.src;
         }
 
         // Content Title
@@ -67,20 +83,20 @@ class DocumentExtractor {
             let texts = [];
 
             for (const component of components) {
-            // RichText – přímý text
-            const text = component?.fields?.text?.value;
-            if (text) {
-                texts.push(text);
-            }
+                // RichText – přímý text
+                const text = component?.fields?.text?.value;
+                if (text) {
+                    texts.push(text);
+                }
 
-            // Rekurzivně zanořené komponenty v placeholders
-            if (component?.placeholders) {
-                for (const nested of Object.values(component.placeholders)) {
-                if (Array.isArray(nested)) {
-                    texts = texts.concat(extractRichTextValues(nested));
+                // Rekurzivně zanořené komponenty v placeholders
+                if (component?.placeholders) {
+                    for (const nested of Object.values(component.placeholders)) {
+                        if (Array.isArray(nested)) {
+                            texts = texts.concat(extractRichTextValues(nested));
+                        }
+                    }
                 }
-                }
-            }
             }
 
             return texts;
@@ -90,12 +106,12 @@ class DocumentExtractor {
         const contentText = extractRichTextValues(headlessMain)
             .filter(text => text) // Remove undefined or null values
             .join(" ");
-            
+        
         // Extract URL and split it into an array
         const url = data.item.rendered.sitecore?.context?.itemPath;
         const urlDetail = url.split('/').filter(segment => segment); // Remove empty segments
-
-        return [{
+            
+        return [{        
             'annotation': annotation,
             'type': data.item.rendered.sitecore?.route?.templateName,
             'id': data.item.id + '-' + language,
@@ -108,6 +124,7 @@ class DocumentExtractor {
             'content_title': contentTitle,
             'content_text': contentText?.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' '),
             'category': category,
+            'category_url': categoryUrl,
             'url': url,
             'url_detail': urlDetail,
             'image_url': imageUrl,
@@ -118,8 +135,17 @@ class DocumentExtractor {
             'location_address_2': data.item.rendered.sitecore?.route?.fields?.locationAddressLine2?.value,
             'event_organizer': data.item.rendered.sitecore?.route?.fields?.eventOrganizer?.fields?.title?.value,
             'time_zone': data.item.rendered.sitecore?.route?.fields?.timeZone?.fields?.title?.value,
-            'file_size': data.item.rendered.sitecore?.route?.fields?.file?.value?.size
-        }];
+            'file_size': data.item.rendered.sitecore?.route?.fields?.file?.value?.size,
+            'file_url': data.item.rendered.sitecore?.route?.fields?.file?.value?.src,
+            'file_extension': data.item.rendered.sitecore?.route?.fields?.file?.value?.extension,
+            'active_ingredients': activeIngredients,     
+            'product_form_title': data.item.rendered.sitecore?.route?.fields?.productForm?.title?.value,
+            'product_form_icon': data.item.rendered.sitecore?.route?.fields?.productForm?.icon?.value,
+            'pack_size': packSize,
+            'product_type_general_icon': data.item.rendered.sitecore?.route?.fields?.productTypeGeneral?.fields?.icon?.value,
+            'product_type_general_title': data.item.rendered.sitecore?.route?.fields?.productTypeGeneral?.fields?.title?.value,
+            'product_leaflet': data.item.rendered.sitecore?.route?.fields?.productLeaflet?.field?.value?.src,
+        }];    
     }
 }
 
